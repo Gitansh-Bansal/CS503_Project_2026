@@ -3,6 +3,7 @@ from strategic_players import *
 from strategic_full_info_experiment import run_strategic_full_info
 from strategic_random_friends_info_experiment import StrategicRandomFriendsRunner
 from synthetic_hardt_experiment import run_synthetic_hardt_exp
+from custom1_experiment import run_custom1_experiment
 
 
 def create_main_folders():
@@ -14,6 +15,7 @@ def create_args_parser():
     parser.add_argument("--full_info_exp", help="Run full info experiment", action="store_true")
     parser.add_argument("--dark_exp", help="Run dark experiment", action="store_true")
     parser.add_argument("--synthetic_exp", help="Run synthetic 1D gaussian experiment", action="store_true")
+    parser.add_argument("--custom1_exp", help="Run custom1: transparent model on 2D synthetic data", action="store_true")
     parser.add_argument("-c", help="This is the scale of the cost Contestant pays for movement", default=5)
     parser.add_argument("-e", help="This is epsilon the weight of the l2 cost function in the total cost constant has to pay for movement."
                                    " default value is 0.2. Only relevant in the full information and dark experiment.",
@@ -62,3 +64,5 @@ if __name__ == '__main__':
         st.execute_strategic_random_friends_exp(args.mp, args.save, args.tes)
     elif args.synthetic_exp:
         run_synthetic_hardt_exp(m_list, args.ns, args.rp, args.trs, args.tes, args.th)
+    elif args.custom1_exp:
+        run_custom1_experiment()

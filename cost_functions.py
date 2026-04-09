@@ -41,7 +41,7 @@ class WeightedLinearCostFunction(SeparableCost):
     max {<a, z-x>, 0} where a is the weights vector and z-x is the changed that player pays on.
     """
 
-    def __init__(self, weighted_vector: np.array, cost_factor=6):
+    def __init__(self, weighted_vector: np.array, cost_factor=1):
         '''
         :param weighted_vector: Weights vector. Each entry i in the vector represents the payment of moving
         one unit in the i'th feature.
