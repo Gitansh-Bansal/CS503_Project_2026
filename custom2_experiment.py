@@ -189,7 +189,7 @@ def plot_errors_vs_m(m_values, dark_svm_errors, dark_hardt_errors,
                  '(Dark vs Transparent vs Non-strategic)', fontsize=15)
     ax.legend(fontsize=9, loc='best')
     ax.grid(True, alpha=0.3)
-    ax.set_ylim(bottom=0)
+    ax.set_ylim(bottom=-0.05)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
     plt.close()
@@ -269,7 +269,7 @@ def plot_combined_summary(m_values, dark_svm_errors, dark_hardt_errors,
     ax1.set_title('Strategic Error vs $m$', fontsize=15)
     ax1.legend(fontsize=9, loc='best')
     ax1.grid(True, alpha=0.3)
-    ax1.set_ylim(bottom=0)
+    ax1.set_ylim(bottom=-0.05)
 
     # ── Right: Price of Opacity vs m ──
     ax2.errorbar(m_values, pop_svm, yerr=pop_svm_std,
