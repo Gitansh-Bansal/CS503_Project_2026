@@ -54,7 +54,7 @@ class WeightedLinearCostFunction(SeparableCost):
     def __call__(self, z: np.array, x: np.array):
         return max(self.a.T @ (z - x), 0)
 
-    def maximize_features_against_binary_model(self, x: np.array, trained_model, tolerance=1e-9):
+    def maximize_features_against_binary_model(self, x: np.array, trained_model, tolerance=1e-4):
         x_tag = cp.Variable(len(x))
 
         func_to_solve = cp.Minimize(cp.maximum(self.cost_factor * self.a.T @ (x_tag - x), 0))
@@ -65,7 +65,7 @@ class WeightedLinearCostFunction(SeparableCost):
         if x_tag is None:
             print("couldn't solve this problem")
             return
-        if trained_model.predict(x_tag.value.reshape(1, -1))[0] == 1 and cost_result.value < 2:
+        if trained_model.predict(x_tag.value.reshape(1, -1))[0] == 1 and cost_result.value <= 2 + tolerance:
             return x_tag.value
         else:
             return x
@@ -158,8 +158,8 @@ class MixWeightedLinearSumSquareCostFunction(CostFunction):
         return x_t, cost
 
 
-    def check_change_condition(self, trained_model, x_tag, cost_result):
-        return trained_model.predict(x_tag.value.reshape(1, -1))[0] == 1 and cost_result.value < 2
+    def check_change_condition(self, trained_model, x_tag, cost_result, tolerance=1e-4):
+        return trained_model.predict(x_tag.value.reshape(1, -1))[0] == 1 and cost_result.value <= 2 + tolerance
 
     def maximize_features_against_binary_model(self, x: np.array, trained_model, tolerance=0.00001,
                                                use_spare_cost=False):
