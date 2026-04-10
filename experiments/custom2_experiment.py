@@ -28,14 +28,16 @@ Plots:
 import numpy as np
 import pandas as pd
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import warnings
 import matplotlib.pyplot as plt
 from sklearn.svm import LinearSVC
 from tqdm import tqdm
-from model import HardtAlgo
-from cost_functions import WeightedLinearCostFunction
-from strategic_players import strategic_modify_using_known_clf
-from utills_and_consts import safe_create_folder, result_folder_path
+from src.model import HardtAlgo
+from src.cost_functions import WeightedLinearCostFunction
+from src.strategic_players import strategic_modify_using_known_clf
+from src.utills_and_consts import safe_create_folder, result_folder_path
 
 # Suppress noisy sklearn warnings about feature names
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
@@ -57,7 +59,7 @@ FEATURE_LIST = [f'f{i}' for i in range(NUM_DIMENSIONS)]
 
 COST_FACTOR = 1                        # scale of cost function
 
-TRAIN_SIZE = 700
+TRAIN_SIZE = 550
 TEST_SIZE  = 100
 
 M_VALUES = [4, 8, 16, 32, 64, 128, 256, 512]    # number of friend-labelled samples

@@ -1,4 +1,4 @@
-from cost_functions import *
+from src.cost_functions import *
 from tqdm import tqdm
 import pandas as pd
 

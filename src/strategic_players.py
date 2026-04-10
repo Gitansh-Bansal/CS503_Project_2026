@@ -1,10 +1,10 @@
-from cost_functions import *
+from src.cost_functions import *
 from tqdm import tqdm
 from sklearn.svm import LinearSVC
-from utills_and_consts import *
+from src.utills_and_consts import *
 import json
-from model import HardtAlgo
-from projected_visualization import visualize_projected_changed_df
+from src.model import HardtAlgo
+from src.projected_visualization import visualize_projected_changed_df
 
 
 def get_hardt_model(cost_factor, train_path, force_train_hardt=False,

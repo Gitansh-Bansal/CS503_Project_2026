@@ -18,17 +18,21 @@ Visualizations:
 import numpy as np
 import pandas as pd
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from sklearn.svm import LinearSVC
-from model import HardtAlgo
-from cost_functions import WeightedLinearCostFunction
-from strategic_players import strategic_modify_using_known_clf
-from utills_and_consts import safe_create_folder, result_folder_path
+from src.model import HardtAlgo
+from src.cost_functions import WeightedLinearCostFunction
+from src.strategic_players import strategic_modify_using_known_clf
+from src.utills_and_consts import safe_create_folder, result_folder_path
 
 # ── Fixed parameters ──────────────────────────────────────────────────────────
 W_TRUE = np.array([1.0, 2.0])          # ground truth weight vector
-A_COST = np.array([1.0, 1.5])          # cost weight vector
+A_COST = np.array([1.0, 2.0])          # cost weight vector
 COST_FACTOR = 1                        # scale of cost function
 TRAIN_SIZE = 500
 TEST_SIZE = 100
@@ -94,18 +98,18 @@ def plot_data_with_labels(train_df, test_df, w, save_path):
     # Plot training data
     pos_train = train_df[train_df['LoanStatus'] == 1]
     neg_train = train_df[train_df['LoanStatus'] == -1]
-    ax.scatter(pos_train['f0'], pos_train['f1'], c='#2196F3', alpha=0.35,
+    ax.scatter(pos_train['f0'], pos_train['f1'], c='#2196F3', alpha=0.6,
                s=20, label='Train +1', edgecolors='none')
-    ax.scatter(neg_train['f0'], neg_train['f1'], c='#FF5722', alpha=0.35,
+    ax.scatter(neg_train['f0'], neg_train['f1'], c='#FF5722', alpha=0.6,
                s=20, label='Train −1', edgecolors='none')
 
-    # Plot test data (larger markers)
+    # Plot test data
     pos_test = test_df[test_df['LoanStatus'] == 1]
     neg_test = test_df[test_df['LoanStatus'] == -1]
-    ax.scatter(pos_test['f0'], pos_test['f1'], c='#2196F3', alpha=0.9,
-               s=50, marker='D', label='Test +1', edgecolors='black', linewidths=0.5)
-    ax.scatter(neg_test['f0'], neg_test['f1'], c='#FF5722', alpha=0.9,
-               s=50, marker='D', label='Test −1', edgecolors='black', linewidths=0.5)
+    ax.scatter(pos_test['f0'], pos_test['f1'], c='#2196F3', alpha=0.7,
+               s=35, marker='D', label='Test +1', edgecolors='white', linewidths=0.5)
+    ax.scatter(neg_test['f0'], neg_test['f1'], c='#FF5722', alpha=0.7,
+               s=35, marker='D', label='Test −1', edgecolors='white', linewidths=0.5)
 
     # Ground truth boundary
     xlim = (train_df['f0'].min() - 0.5, train_df['f0'].max() + 0.5)
@@ -143,8 +147,8 @@ def plot_decision_boundaries(train_df, w, svm_model, hardt_model, save_path):
     # Plot training data
     pos = train_df[train_df['LoanStatus'] == 1]
     neg = train_df[train_df['LoanStatus'] == -1]
-    ax.scatter(pos['f0'], pos['f1'], c='#2196F3', alpha=0.3, s=15, edgecolors='none')
-    ax.scatter(neg['f0'], neg['f1'], c='#FF5722', alpha=0.3, s=15, edgecolors='none')
+    ax.scatter(pos['f0'], pos['f1'], c='#2196F3', alpha=0.6, s=15, edgecolors='none')
+    ax.scatter(neg['f0'], neg['f1'], c='#FF5722', alpha=0.6, s=15, edgecolors='none')
 
     # Ground truth boundary
     gx, gy = _ground_truth_line_points(w, xlim)
@@ -334,7 +338,7 @@ def plot_classification_categories(test_df, pred_orig, pred_manip, clf_name,
     for mask, color, marker, label in categories:
         count = mask.sum()
         if count > 0:
-            ax.scatter(X[mask, 0], X[mask, 1], c=color, s=60, marker=marker,
+            ax.scatter(X[mask, 0], X[mask, 1], c=color, s=35, marker=marker,
                        edgecolors='black', linewidths=0.5, zorder=5,
                        label=f'{label}  ({count})', alpha=0.85)
 
