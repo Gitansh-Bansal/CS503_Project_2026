@@ -59,7 +59,7 @@ FEATURE_LIST = [f'f{i}' for i in range(NUM_DIMENSIONS)]
 
 COST_FACTOR = 1                        # scale of cost function
 
-TRAIN_SIZE = 550
+TRAIN_SIZE = 600
 TEST_SIZE  = 100
 
 M_VALUES = [4, 8, 16, 32, 64, 128, 256, 512]    # number of friend-labelled samples
