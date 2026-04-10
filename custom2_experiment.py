@@ -31,6 +31,7 @@ import os
 import warnings
 import matplotlib.pyplot as plt
 from sklearn.svm import LinearSVC
+from tqdm import tqdm
 from model import HardtAlgo
 from cost_functions import WeightedLinearCostFunction
 from strategic_players import strategic_modify_using_known_clf
@@ -40,34 +41,49 @@ from utills_and_consts import safe_create_folder, result_folder_path
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 
 # ── Hyperparameters (easy to change) ─────────────────────────────────────────
-W_TRUE    = np.array([1.0, 2.0])       # ground truth weight vector
-A_COST    = np.array([1.0, 1.5])       # cost weight vector
+NUM_DIMENSIONS = 1                     # Toggle number of dimensions (e.g., 1 or 2)
+
+if NUM_DIMENSIONS == 1:
+    W_TRUE    = np.array([1.0])        # ground truth weight vector
+    A_COST    = np.array([1.0])        # cost weight vector
+elif NUM_DIMENSIONS == 2:
+    W_TRUE    = np.array([1.0, 2.0])
+    A_COST    = np.array([1.0, 1.5])
+else:
+    W_TRUE    = np.ones(NUM_DIMENSIONS)
+    A_COST    = np.ones(NUM_DIMENSIONS)
+
+FEATURE_LIST = [f'f{i}' for i in range(NUM_DIMENSIONS)]
+
 COST_FACTOR = 1                        # scale of cost function
 
-TRAIN_SIZE = 2500
-TEST_SIZE  = 500
+TRAIN_SIZE = 700
+TEST_SIZE  = 100
 
-M_VALUES = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]    # number of friend-labelled samples
+M_VALUES = [4, 8, 16, 32, 64, 128, 256, 512]    # number of friend-labelled samples
 
-NUM_DARK_REPEATS = 10                  # repeat dark experiment to reduce noise
+NUM_DARK_REPEATS = 1                  # repeat dark experiment to reduce noise
 
 SEED = 42
-FEATURE_LIST = ['f0', 'f1']
 
 
 # ── Data generation ──────────────────────────────────────────────────────────
 
-def create_2d_dataset(n, w, seed=None):
+def create_dataset(n, w, seed=None):
     """
-    Generate n points from N(0, I_2) with labels sign(w^T x).
-    Returns a DataFrame with columns: f0, f1, MemberKey, LoanStatus
+    Generate n points from N(0, I_d) with labels sign(w^T x).
+    Returns a DataFrame with columns: f0, ..., fn, MemberKey, LoanStatus
     """
     rng = np.random.RandomState(seed)
-    X = rng.multivariate_normal(mean=[0, 0], cov=np.eye(2), size=n)
+    dim = len(w)
+    
+    # Support arbitrary dimensions
+    X = rng.multivariate_normal(mean=np.zeros(dim), cov=np.eye(dim), size=n)
+    
     labels = np.sign(X @ w).astype(int)
     labels[labels == 0] = 1
 
-    df = pd.DataFrame(X, columns=['f0', 'f1'])
+    df = pd.DataFrame(X, columns=[f'f{i}' for i in range(dim)])
     df['MemberKey'] = [f's{i}' for i in range(n)]
     df['LoanStatus'] = labels
     return df
@@ -96,7 +112,7 @@ def compute_transparent_error(test_df, clf, true_labels, cost_vec, cost_factor):
 # ── Dark evaluation ──────────────────────────────────────────────────────────
 
 def compute_dark_error(train_df, test_df, clf, true_labels, m, cost_vec,
-                       cost_factor, rng):
+                       cost_factor, rng, desc="Eval"):
     """
     Dark case:
       1. Sample m points from train_df, label them with clf  -> (x, f(x))
@@ -105,40 +121,45 @@ def compute_dark_error(train_df, test_df, clf, true_labels, m, cost_vec,
       4. Jury evaluates clf on manipulated inputs
     Returns error = Pr[h(x) != f(Delta_{f_hat}(x))]
     """
-    # Step 1: sample m friend-points and label with clf
-    indices = rng.choice(len(train_df), size=m, replace=False)
-    friend_X = train_df.iloc[indices][FEATURE_LIST].values
-
-    if isinstance(clf, HardtAlgo):
-        friend_labels = clf.predict(pd.DataFrame(friend_X, columns=FEATURE_LIST))
-    else:
-        friend_labels = clf.predict(friend_X)
-
-    # Step 2: train f_hat via SVM on friend data
-    # Check if both classes are present
-    if len(np.unique(friend_labels)) < 2:
-        # If only one class, f_hat can't be trained meaningfully.
-        # Contestants can't manipulate -> they submit original test data.
-        if isinstance(clf, HardtAlgo):
-            preds = clf.predict(pd.DataFrame(test_df[FEATURE_LIST]))
-        else:
-            preds = clf.predict(test_df[FEATURE_LIST].values)
-        return np.mean(preds != true_labels)
-
-    f_hat = LinearSVC(C=1000, random_state=42, max_iter=1000000)
-    f_hat.fit(friend_X, friend_labels)
-
-    # Step 3: contestants manipulate test data against f_hat
     cost_func = WeightedLinearCostFunction(cost_vec, cost_factor=cost_factor)
-    modified_df = strategic_modify_using_known_clf(test_df, f_hat, FEATURE_LIST, cost_func)
+    incorrect_count = 0
+    n_test = len(test_df)
 
-    # Step 4: jury evaluates the REAL classifier clf on manipulated data
-    if isinstance(clf, HardtAlgo):
-        preds = clf.predict(pd.DataFrame(modified_df[FEATURE_LIST]))
-    else:
-        preds = clf.predict(modified_df[FEATURE_LIST].values)
+    for i in tqdm(range(n_test), desc=desc, leave=False):
+        # Step 1: sample m friend-points and label with clf for THIS specific user
+        # Use rejection sampling to ensure at least one example from each class
+        while True:
+            indices = rng.choice(len(train_df), size=m, replace=False)
+            friend_X = train_df.iloc[indices][FEATURE_LIST].values
 
-    error = np.mean(preds != true_labels)
+            if isinstance(clf, HardtAlgo):
+                friend_labels = clf.predict(pd.DataFrame(friend_X, columns=FEATURE_LIST))
+            else:
+                friend_labels = clf.predict(friend_X)
+                
+            # Check if both classes are present
+            if len(np.unique(friend_labels)) >= 2:
+                break
+
+        # Step 2: train individualized f_x via SVM on friend data
+        f_x = LinearSVC(C=1000, random_state=42, max_iter=1000000)
+        f_x.fit(friend_X, friend_labels)
+
+        # Step 3: user manipulates ONLY their own point
+        row_df = test_df.iloc[[i]].copy()
+        modified_row = strategic_modify_using_known_clf(row_df, f_x, FEATURE_LIST, cost_func)
+
+        # Step 4: jury evaluates the REAL classifier clf on manipulated data
+        if isinstance(clf, HardtAlgo):
+            pred = clf.predict(pd.DataFrame(modified_row[FEATURE_LIST]))
+        else:
+            pred = clf.predict(modified_row[FEATURE_LIST].values)
+
+        pred_val = pred.iloc[0] if isinstance(pred, pd.Series) else pred[0]
+        if pred_val != true_labels[i]:
+            incorrect_count += 1
+
+    error = incorrect_count / n_test
     return error
 
 
@@ -311,8 +332,8 @@ def run_custom2_experiment():
 
     # ── Generate data ────────────────────────────────────────────────────
     print(f'\n[1/5] Generating data: {TRAIN_SIZE} train + {TEST_SIZE} test ...')
-    train_df = create_2d_dataset(TRAIN_SIZE, W_TRUE, seed=SEED)
-    test_df  = create_2d_dataset(TEST_SIZE,  W_TRUE, seed=SEED + 1)
+    train_df = create_dataset(TRAIN_SIZE, W_TRUE, seed=SEED)
+    test_df  = create_dataset(TEST_SIZE,  W_TRUE, seed=SEED + 1)
 
     true_labels = test_df['LoanStatus'].values
     print(f'  Train: +1={sum(train_df["LoanStatus"]==1)}, '
@@ -372,14 +393,16 @@ def run_custom2_experiment():
             # Dark SVM
             err_svm = compute_dark_error(
                 train_df, test_df, svm_model, true_labels,
-                m, A_COST, COST_FACTOR, rng)
+                m, A_COST, COST_FACTOR, rng,
+                desc=f"Dark SVM (m={m}, rep={repeat+1}/{NUM_DARK_REPEATS})")
             svm_errors_for_m.append(err_svm)
 
             # Dark Hardt
             rng2 = np.random.RandomState(SEED + 100 * m + repeat + 1000)
             err_hardt = compute_dark_error(
                 train_df, test_df, hardt_model, true_labels,
-                m, A_COST, COST_FACTOR, rng2)
+                m, A_COST, COST_FACTOR, rng2,
+                desc=f"Dark Hardt (m={m}, rep={repeat+1}/{NUM_DARK_REPEATS})")
             hardt_errors_for_m.append(err_hardt)
 
         svm_mean   = np.mean(svm_errors_for_m)

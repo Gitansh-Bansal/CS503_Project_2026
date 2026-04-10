@@ -46,7 +46,7 @@ def strategic_modify_using_known_clf(orig_df: pd.DataFrame, f, feature_list: lis
     :return: The data after each player changed his features
     '''
     modify_data = orig_df[feature_list].copy()
-    with tqdm(total=len(orig_df)) as t:
+    with tqdm(total=len(orig_df), disable=(len(orig_df) <= 1)) as t:
         for index, ex in orig_df[feature_list].iterrows():
             x = np.array(ex)
             if f.predict(x.reshape(1, -1))[0] == -1:

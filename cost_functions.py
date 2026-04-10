@@ -58,7 +58,9 @@ class WeightedLinearCostFunction(SeparableCost):
         x_tag = cp.Variable(len(x))
 
         func_to_solve = cp.Minimize(cp.maximum(self.cost_factor * self.a.T @ (x_tag - x), 0))
-        constrains = [x_tag @ trained_model.coef_[0] >= -trained_model.intercept_ + tolerance]
+        # Scale tolerance by the norm of the model's coefficients so the geometric distance is consistent
+        norm_w = np.linalg.norm(trained_model.coef_[0])
+        constrains = [x_tag @ trained_model.coef_[0] >= -trained_model.intercept_ + tolerance * norm_w]
         prob = cp.Problem(func_to_solve, constrains)
         prob.solve()
         cost_result = cp.maximum(self.cost_factor * self.a.T @ (x_tag.value - x), 0)
@@ -124,7 +126,8 @@ class MixWeightedLinearSumSquareCostFunction(CostFunction):
         func_to_solve = cp.Minimize(
             self.cost_factor * (cp.maximum((1 - self.epsilon) * self.a.T @ (x_t - x), 0) + self.epsilon *
                                 cp.sum((x_t - x) ** 2)))
-        constrains = [x_t @ model.coef_[0] >= -model.intercept_ + tol]
+        norm_w = np.linalg.norm(model.coef_[0])
+        constrains = [x_t @ model.coef_[0] >= -model.intercept_ + tol * norm_w]
 
         prob = cp.Problem(func_to_solve, constrains)
         try:
