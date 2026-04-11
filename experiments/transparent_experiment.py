@@ -1,5 +1,5 @@
 """
-Custom1 Experiment: Transparent Model (Hardt) on 2D Synthetic Data
+Transparent Experiment: Transparent Model (Hardt) on 2D Synthetic Data
 
 Setup:
   - x ~ N(0, I_2)  (2D standard normal)
@@ -32,7 +32,7 @@ from src.utills_and_consts import safe_create_folder, result_folder_path
 
 # ── Fixed parameters ──────────────────────────────────────────────────────────
 W_TRUE = np.array([1.0, 2.0])          # ground truth weight vector
-A_COST = np.array([1.0, 2.0])          # cost weight vector
+A_COST = np.array([1.0, 1.5])          # cost weight vector
 COST_FACTOR = 1                        # scale of cost function
 TRAIN_SIZE = 500
 TEST_SIZE = 100
@@ -362,15 +362,15 @@ def plot_classification_categories(test_df, pred_orig, pred_manip, clf_name,
 
 # ── Main experiment runner ───────────────────────────────────────────────────
 
-def run_custom1_experiment():
-    """Run the full custom1 experiment."""
+def run_transparent_experiment():
+    """Run the full transparent experiment."""
     np.random.seed(SEED)
     print('=' * 60)
-    print(' Custom1 Experiment: Transparent Model on 2D Synthetic Data')
+    print(' Transparent Experiment: Transparent Model on 2D Synthetic Data')
     print('=' * 60)
 
     # ── Create output folder ─────────────────────────────────────────────
-    exp_folder = safe_create_folder(result_folder_path, 'custom1_exp')
+    exp_folder = safe_create_folder(result_folder_path, 'transparent_exp')
 
     # ── Generate data ────────────────────────────────────────────────────
     print(f'\n[1/6] Generating data: {TRAIN_SIZE} train + {TEST_SIZE} test points ...')
@@ -496,4 +496,4 @@ def run_custom1_experiment():
 
 
 if __name__ == '__main__':
-    run_custom1_experiment()
+    run_transparent_experiment()

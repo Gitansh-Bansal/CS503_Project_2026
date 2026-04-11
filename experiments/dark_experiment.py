@@ -1,5 +1,5 @@
 """
-Custom2 Experiment: Dark (Opaque) vs Transparent Strategic Classification
+Dark Experiment: Dark (Opaque) vs Transparent Strategic Classification
 
 Setup:
   - x ~ N(0, I_2)  (2D standard normal)
@@ -312,7 +312,7 @@ def plot_combined_summary(m_values, dark_svm_errors, dark_hardt_errors,
     ax2.legend(fontsize=11, loc='best')
     ax2.grid(True, alpha=0.3)
 
-    plt.suptitle('Custom2: Dark vs Transparent Strategic Classification',
+    plt.suptitle('Dark: Dark vs Transparent Strategic Classification',
                  fontsize=16, y=1.02, fontweight='bold')
     plt.tight_layout()
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
@@ -322,15 +322,15 @@ def plot_combined_summary(m_values, dark_svm_errors, dark_hardt_errors,
 
 # ── Main experiment runner ───────────────────────────────────────────────────
 
-def run_custom2_experiment():
-    """Run the full custom2 dark-vs-transparent experiment."""
+def run_dark_experiment():
+    """Run the full dark dark-vs-transparent experiment."""
     np.random.seed(SEED)
     print('=' * 70)
-    print(' Custom2 Experiment: Dark vs Transparent Strategic Classification')
+    print(' Dark Experiment: Dark vs Transparent Strategic Classification')
     print('=' * 70)
 
     # ── Create output folder ─────────────────────────────────────────────
-    exp_folder = safe_create_folder(result_folder_path, 'custom2_exp')
+    exp_folder = safe_create_folder(result_folder_path, 'dark_exp')
 
     # ── Generate data ────────────────────────────────────────────────────
     print(f'\n[1/5] Generating data: {TRAIN_SIZE} train + {TEST_SIZE} test ...')
@@ -480,4 +480,4 @@ def run_custom2_experiment():
 
 
 if __name__ == '__main__':
-    run_custom2_experiment()
+    run_dark_experiment()
