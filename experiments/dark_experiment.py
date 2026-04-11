@@ -201,7 +201,7 @@ def plot_errors_vs_m(m_values, dark_svm_errors, dark_hardt_errors,
     # Shade the Price of Opacity region for Hardt
     trans_hardt_line = [trans_hardt_error] * len(m_values)
     ax.fill_between(m_values, dark_hardt_errors, trans_hardt_line,
-                    color='#9C27B0', alpha=0.15, label='PoO (Hardt)', zorder=2)
+                    color='#9C27B0', alpha=0.15, label='POP (Hardt)', zorder=2)
 
     ax.set_xscale('log', base=2)
     ax.set_xticks(m_values)
@@ -223,7 +223,7 @@ def plot_price_of_opacity(m_values, pop_svm, pop_hardt,
                           pop_svm_std, pop_hardt_std, save_path):
     """
     Plot Price of Opacity vs m for both SVM and Hardt.
-    PoO = error_dark - error_transparent
+    POP = error_dark - error_transparent
     """
     fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -257,7 +257,7 @@ def plot_combined_summary(m_values, dark_svm_errors, dark_hardt_errors,
                           pop_svm_std, pop_hardt_std,
                           nonstrat_svm_error, nonstrat_hardt_error, save_path):
     """
-    Combined figure with two subplots: errors (left) and PoO (right).
+    Combined figure with two subplots: errors (left) and POP (right).
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 7))
 
@@ -282,7 +282,7 @@ def plot_combined_summary(m_values, dark_svm_errors, dark_hardt_errors,
     # Shade the Price of Opacity region for Hardt
     trans_hardt_line = [trans_hardt_error] * len(m_values)
     ax1.fill_between(m_values, dark_hardt_errors, trans_hardt_line,
-                     color='#9C27B0', alpha=0.15, label='PoO (Hardt)', zorder=2)
+                     color='#9C27B0', alpha=0.15, label='POP (Hardt)', zorder=2)
 
     ax1.set_xscale('log', base=2)
     ax1.set_xticks(m_values)
@@ -468,7 +468,7 @@ def run_dark_experiment():
     print(f'  Transparent Hardt error: {trans_hardt_error:.4f}')
     print()
     print(f'  {"m":>5}  {"Dark SVM":>14}  {"Dark Hardt":>14}  '
-          f'{"PoO SVM":>10}  {"PoO Hardt":>10}')
+          f'{"POP SVM":>10}  {"POP Hardt":>10}')
     print(f'  {"-"*5}  {"-"*14}  {"-"*14}  {"-"*10}  {"-"*10}')
     for i, m in enumerate(M_VALUES):
         print(f'  {m:>5}  '

@@ -329,10 +329,10 @@ def plot_classification_categories(test_df, pred_orig, pred_manip, clf_name,
     cat4 = (pred_orig == -1) & (pred_manip == 1)
 
     categories = [
-        (cat1, '#E91E63', 's', f'{orig_label}=1, f(Δx)=0'),   # pink square
-        (cat2, '#FF9800', 'o', f'{orig_label}=0, f(Δx)=0'),   # orange circle
-        (cat3, '#2196F3', 'D', f'{orig_label}=1, f(Δx)=1'),   # blue diamond
-        (cat4, '#4CAF50', '^', f'{orig_label}=0, f(Δx)=1'),   # green triangle
+        (cat1, '#FF0000', 's', f'{orig_label}=1, f(Δx)=0'),   # pink square
+        (cat2, '#4CAF50', 'o', f'{orig_label}=0, f(Δx)=0'),   # orange circle
+        (cat3, '#4CAF50', 'D', f'{orig_label}=1, f(Δx)=1'),   # blue diamond
+        (cat4, '#FF0000', '^', f'{orig_label}=0, f(Δx)=1'),   # green triangle
     ]
 
     for mask, color, marker, label in categories:
